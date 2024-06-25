@@ -1,0 +1,6 @@
+numpy
+ultralytics
+pandas
+opencv-python
+argparse
+easyocr
