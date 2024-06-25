@@ -5,8 +5,8 @@ import re
 from utils import get_region
 
 
-car_detector = YOLO('./models/yolov8n.pt')
-plate_detector = YOLO('./models/license_plate_detector.pt')
+car_detector = YOLO('../models/yolov8n.pt')
+plate_detector = YOLO('../models/license_plate_detector.pt')
 
 
 def track_cars(frame) -> list:
@@ -43,15 +43,11 @@ def track_license_plates(frame, cars_coords: list) -> list:
        if success:
             text = get_text_from_license_plate(frame, license_plate)
             license_plates_info.append({
-                'car': {'coords': [int(x1_car), int(y1_car), int(x2_car), int(y2_car)]},
-                'license_plate': {
-                    'coords': [int(x1), int(y1), int(x2), int(y2)],
-                    'text': text
-                }
+                'x1_car': int(x1_car), 'y1_car': int(y1_car), 'x2_car': int(x2_car), 'y2_car': int(y2_car), 
+                'x1': int(x1), 'y1': int(y1), 'x2': int(x2), 'y2': int(y2),
+                'text': text
             })
             
-    print(license_plates_info)
-       
     return license_plates_info
 
 
@@ -68,3 +64,7 @@ def get_text_from_license_plate(frame, license_plate) -> str:
         strs.append(reg.sub('', text))
         
     return ''.join(strs)
+
+
+def get_license_detections(frame):
+    return plate_detector(frame)[0]
