@@ -3,10 +3,11 @@ import easyocr
 import re
 
 from utils import get_region
+from config import CAR_MODEL_PATH, PLATE_MODEL_PATH
 
 
-car_detector = YOLO('../models/yolov8n.pt')
-plate_detector = YOLO('../models/license_plate_detector.pt')
+car_detector = YOLO(CAR_MODEL_PATH)
+plate_detector = YOLO(PLATE_MODEL_PATH)
 
 
 def track_cars(frame) -> list:
@@ -32,7 +33,7 @@ def get_car(license_plate, cars_coords) -> tuple:
     return (False, [-1, -1, -1, -1])
 
                 
-def track_license_plates(frame, cars_coords: list) -> list:
+def track_license_plates(frame, cars_coords: list, is_video=False) -> list:
     license_plates_info = []
     
     license_plates = plate_detector(frame)[0]
@@ -41,7 +42,7 @@ def track_license_plates(frame, cars_coords: list) -> list:
        x1, y1, x2, y2, _, _ = license_plate
        x1_car, y1_car, x2_car, y2_car  = car_coords
        if success:
-            text = get_text_from_license_plate(frame, license_plate)
+            text = get_text_from_license_plate(frame, license_plate, is_video=is_video)
             license_plates_info.append({
                 'x1_car': int(x1_car), 'y1_car': int(y1_car), 'x2_car': int(x2_car), 'y2_car': int(y2_car), 
                 'x1': int(x1), 'y1': int(y1), 'x2': int(x2), 'y2': int(y2),
@@ -51,10 +52,10 @@ def track_license_plates(frame, cars_coords: list) -> list:
     return license_plates_info
 
 
-def get_text_from_license_plate(frame, license_plate) -> str:
+def get_text_from_license_plate(frame, license_plate, is_video=False) -> str:
     reader = easyocr.Reader(['en'], gpu=False)
     
-    frame = get_region(frame, license_plate)
+    frame = get_region(frame, license_plate, is_video=is_video)
     strs = [] 
     
     for detection in reader.readtext(frame):
