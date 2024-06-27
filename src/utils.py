@@ -5,6 +5,7 @@ import cv2
 import csv
 from detection import get_annotated_image
 
+from config import OUTPUT_PATH
 
 def save_result(detection, license_plates_info: list, filename: str) -> None:
     time = datetime.now()
@@ -15,10 +16,11 @@ def save_result(detection, license_plates_info: list, filename: str) -> None:
         (str(time.minute) if len(str(time.minute)) == 2 else '0' + str(time.minute))  + '_' +\
         (str(time.second) if len(str(time.second)) == 2 else '0' + str(time.second)) 
 
-    dirname = f'../outputs/{time}'
+    dirname = OUTPUT_PATH + time
+
     os.makedirs(dirname)
     
-    filename = filename[filename.rfind('/') + 1:]
+    filename = filename[filename.rfind(os.sep) + 1:]
     
     # save image
     cv2.imwrite(os.path.join(dirname, filename), get_annotated_image(filename))
@@ -44,8 +46,9 @@ def get_input_filename() -> str:
     return filename
 
 
-def get_region(filename: str, coords):
+def get_region(frame: str, coords, is_video=False):
     x1, y1, x2, y2,  _,  _  = coords
-    frame = cv2.imread(filename)
+    if not is_video:
+        frame = cv2.imread(frame)
     
     return frame[int(y1):int(y2), int(x1):int(x2)]
