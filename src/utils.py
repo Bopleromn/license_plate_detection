@@ -3,6 +3,7 @@ from datetime import datetime
 import argparse
 import cv2
 import csv
+from detection import get_annotated_image
 
 
 def save_result(detection, license_plates_info: list, filename: str) -> None:
@@ -20,7 +21,8 @@ def save_result(detection, license_plates_info: list, filename: str) -> None:
     filename = filename[filename.rfind('/') + 1:]
     
     # save image
-    detection.save(os.path.join(dirname, filename))
+    cv2.imwrite(os.path.join(dirname, filename), get_annotated_image(filename))
+    # detection.save(os.path.join(dirname, filename))
     
     # save csv
     with open(os.path.join(dirname, f'{filename[:filename.find(".")]}.csv'), mode='w', newline='') as csvfile:

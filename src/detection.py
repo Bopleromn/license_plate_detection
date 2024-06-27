@@ -1,6 +1,7 @@
 from ultralytics import YOLO
 import easyocr
 import re
+import cv2
 
 from utils import get_region
 
@@ -57,13 +58,36 @@ def get_text_from_license_plate(frame, license_plate) -> str:
     frame = get_region(frame, license_plate)
     strs = [] 
     
+    img = cv2.imread(frame)
+    
     for detection in reader.readtext(frame):
-        _, text, _ = detection
+        top_left = [int(value) for value in detection[0][0]]
+        bottom_right = [int(value) for value in detection[0][2]]
+        text = detection[1]
+        
+        img = cv2.rectangle(img, top_left, bottom_right, (255, 0, 0), 5)
+        img = cv2.putText(img, text, top_left, cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 2)
         
         reg = re.compile('[^A-Za-z0-9]')
         strs.append(reg.sub('', text))
         
     return ''.join(strs)
+
+
+def get_annotated_image(frame):
+    reader = easyocr.Reader(['en'], gpu=False)
+    
+    img = cv2.imread(frame)
+    
+    for detection in reader.readtext(frame):
+        top_left = [int(value) for value in detection[0][0]]
+        bottom_right = [int(value) for value in detection[0][2]]
+        text = detection[1]
+        
+        img = cv2.rectangle(img, top_left, bottom_right, (255, 0, 0), 5)
+        img = cv2.putText(img, text, top_left, cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 2)    
+    
+    return img
 
 
 def get_license_detections(frame):
